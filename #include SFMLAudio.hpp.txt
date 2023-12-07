@@ -1,0 +1,228 @@
+#include <SFML/Audio.hpp>
+#include <SFML/Graphics.hpp>
+#include <iostream>
+#include <ctime>
+
+enum class Estado {
+    MENU,
+    JUGANDO,
+    GAME_OVER
+};
+
+int main() {
+    Estado estado = Estado::MENU;
+
+    sf::RenderWindow window(sf::VideoMode(800, 600), "Shooter Game");
+
+    sf::Texture enemy1Texture;
+    if (!enemy1Texture.loadFromFile("C:/Users/santino/Desktop/Nueva carpeta (9)/Textura/enemy1.jpg")) {
+        return EXIT_FAILURE;
+    }
+
+    sf::Texture enemy2Texture;
+    if (!enemy2Texture.loadFromFile("C:/Users/santino/Desktop/Nueva carpeta (9)/Textura/enemy2.jpg")) {
+        return EXIT_FAILURE;
+    }
+
+    sf::Texture civilTexture;
+    if (!civilTexture.loadFromFile("C:/Users/santino/Desktop/Nueva carpeta (9)/Textura/civil.jpg")) {
+        return EXIT_FAILURE;
+    }
+
+    sf::Texture miraTexture;
+    if (!miraTexture.loadFromFile("C:/Users/santino/Desktop/Nueva carpeta (9)/Textura/mira.jpg")) {
+        return EXIT_FAILURE;
+    }
+
+    sf::Sprite enemy1(enemy1Texture);
+    sf::Sprite enemy2(enemy2Texture);
+    sf::Sprite civil(civilTexture);
+    sf::Sprite mira(miraTexture);
+
+    int playerLives = 9;
+    int playerScore = 0;
+    bool enemy1Visible = true;
+    bool enemy2Visible = true;
+    bool civilVisible = true;
+
+    sf::Clock enemyAttackClock;
+    float enemyAttackTime = 15.0f;
+
+    sf::Font font;
+    if (!font.loadFromFile("C:/Users/santino/Desktop/Nueva carpeta (9)/Textura/Payday.ttf")) {
+        return EXIT_FAILURE;
+    }
+
+    sf::Text menuJugar("Jugar", font, 30);
+    menuJugar.setPosition(300, 300);
+
+    sf::Text menuAbandonar("Abandonar", font, 30);
+    menuAbandonar.setPosition(300, 350);
+
+    sf::Text ultimaPuntuacion("", font, 20);
+    ultimaPuntuacion.setPosition(300, 400);
+
+    sf::Text livesText("Vidas: 9", font, 20);
+    livesText.setPosition(10, 10);
+
+    sf::Text scoreText("Puntuacion: 0", font, 20);
+    scoreText.setPosition(600, 10);
+
+    sf::Text gameOverText("GAME OVER", font, 50);
+    gameOverText.setPosition(250, 250);
+
+    while (window.isOpen()) {
+        sf::Event event;
+        while (window.pollEvent(event)) {
+            if (event.type == sf::Event::Closed) {
+                window.close();
+            }
+
+            if (estado == Estado::MENU && event.type == sf::Event::MouseButtonPressed) {
+                sf::Vector2i mousePosition = sf::Mouse::getPosition(window);
+                if (menuJugar.getGlobalBounds().contains(static_cast<float>(mousePosition.x), static_cast<float>(mousePosition.y))) {
+                    estado = Estado::JUGANDO;
+                } else if (menuAbandonar.getGlobalBounds().contains(static_cast<float>(mousePosition.x), static_cast<float>(mousePosition.y))) {
+                    std::cout << "Has abandonado el juego." << std::endl;
+                    window.close();
+                    return EXIT_SUCCESS;
+                }
+            }
+        }
+
+        window.clear();
+
+        if (estado == Estado::MENU) {
+            window.draw(menuJugar);
+            window.draw(menuAbandonar);
+            ultimaPuntuacion.setString("Última puntuación: " + std::to_string(playerScore)); // Mostrar última puntuación
+            window.draw(ultimaPuntuacion);
+        } else if (estado == Estado::JUGANDO) {
+            // Tu lógica de juego actual aquí
+            // ... Resto del código del juego ...
+            estado = Estado::GAME_OVER; // Para propósitos de demostración, terminamos el juego después de un ciclo
+        } else if (estado == Estado::GAME_OVER) {
+            // Mostrar el estado de Game Over aquí si es necesario
+            // ... Resto del código para el estado de Game Over ...
+            std::cout << "Juego terminado. Puntuación final: " << playerScore << std::endl;
+            // Restablecer valores y regresar al menú u otra acción necesaria
+            playerLives = 9;
+            playerScore = 0;
+            estado = Estado::MENU;
+
+    sf::Text livesText("Vidas: 9", font, 20);
+    livesText.setPosition(10, 10);
+
+    sf::Text scoreText("Puntuacion: 0", font, 20);
+    scoreText.setPosition(600, 10);
+
+    sf::Text gameOverText("GAME OVER", font, 50);
+    gameOverText.setPosition(250, 250);
+
+    sf::Music fondo;
+    if (!fondo.openFromFile("C:/Users/santino/Desktop/Nueva carpeta (9)/Sonido/fondo.ogg")) {
+        return EXIT_FAILURE;
+    }
+
+    sf::Clock civilClock;
+    float civilDisappearTime = 15.0f;
+
+    bool gameOver = false;
+    sf::Clock gameOverClock;
+
+    while (window.isOpen()) {
+        sf::Event event;
+        while (window.pollEvent(event)) {
+            if (event.type == sf::Event::Closed) {
+                window.close();
+            }
+
+            if (event.type == sf::Event::MouseButtonPressed) {
+                sf::Vector2i mousePosition = sf::Mouse::getPosition(window);
+
+                if (enemy1.getGlobalBounds().contains(static_cast<float>(mousePosition.x), static_cast<float>(mousePosition.y)) && enemy1Visible) {
+                    enemy1Visible = false;
+                    playerScore += 10;
+                }
+
+                if (enemy2.getGlobalBounds().contains(static_cast<float>(mousePosition.x), static_cast<float>(mousePosition.y)) && enemy2Visible) {
+                    enemy2Visible = false;
+                    playerScore += 10;
+                }
+
+                if (civil.getGlobalBounds().contains(static_cast<float>(mousePosition.x), static_cast<float>(mousePosition.y)) && civilVisible) {
+                    civilVisible = false;
+                    playerScore -= 5;
+                }
+            }
+        }
+
+        if (enemyAttackClock.getElapsedTime().asSeconds() > enemyAttackTime) {
+            if (enemy1Visible) {
+                playerLives--;
+                enemy1Visible = false;
+            }
+
+            if (enemy2Visible) {
+                playerLives--;
+                enemy2Visible = false;
+            }
+
+            enemyAttackClock.restart();
+        }
+
+        window.clear();
+
+        if (enemy1Visible) {
+            window.draw(enemy1);
+        }
+
+        if (enemy2Visible) {
+            window.draw(enemy2);
+        }
+
+        if (civilVisible) {
+    window.draw(civil);
+}
+
+if (/* Condición para mostrar la mira */) {
+    // Ajusta la posición de la mira dependiendo del mouse o algún otro criterio
+    // mira.setPosition(/* Posición adecuada */);
+    window.draw(mira);
+}
+
+        window.display();
+
+if (playerLives <= 0 || enemyAttackClock.getElapsedTime().asSeconds() > 420) {
+    if (!gameOver) {
+        gameOver = true;
+        gameOverClock.restart();
+    }
+
+    if (gameOverClock.getElapsedTime().asSeconds() < 10) {
+        window.clear();
+        window.draw(gameOverText);
+        window.display();
+    } else {
+        std::cout << "Juego terminado. Puntuacion final: " << playerScore << std::endl;
+        // Reset valores y regresar al menú u otra acción necesaria
+        playerLives = 9;
+        playerScore = 0;
+        gameOver = false;
+        enemy1Visible = true;
+        enemy2Visible = true;
+        civilVisible = true;
+        enemyAttackClock.restart();
+        gameOverClock.restart();
+    }
+    continue;
+}
+    } else {
+        std::cout << "Has abandonado el juego." << std::endl;
+        }
+
+        window.display();
+    }
+
+    return EXIT_SUCCESS;
+}

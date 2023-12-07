@@ -1,0 +1,287 @@
+clase juego: 
+
+#include <SFML/Audio.hpp>
+#include <SFML/Graphics.hpp>
+#include <iostream>
+#include <ctime>
+
+enum class Estado {
+    MENU,
+    JUGANDO,
+    GAME_OVER
+};
+
+class Game {
+private:
+    Estado estado;
+    sf::RenderWindow window;
+    // Agrega aquí las variables miembro necesarias
+
+public:
+    Game() : estado(Estado::MENU), window(sf::VideoMode(800, 600), "Shooter Game") {
+        // Inicializa las variables miembro y carga los recursos
+        // Utiliza las rutas adecuadas para tus texturas y sonidos
+    }
+
+    void run() {
+        while (window.isOpen()) {
+            sf::Event event;
+            while (window.pollEvent(event)) {
+                handleEvent(event);
+            }
+
+            window.clear();
+
+            if (estado == Estado::MENU) {
+                drawMenu();
+            } else if (estado == Estado::JUGANDO) {
+                updateGame();
+                drawGame();
+            } else if (estado == Estado::GAME_OVER) {
+                drawGameOver();
+            }
+
+            window.display();
+        }
+    }
+
+private:
+    void handleEvent(const sf::Event& event) {
+        // Maneja los eventos según el estado del juego
+    }
+
+    void drawMenu() {
+        // Dibuja el menú en la ventana
+    }
+
+    void updateGame() {
+        // Actualiza la lógica del juego
+    }
+
+    void drawGame() {
+        // Dibuja el juego en la ventana
+    }
+
+    void drawGameOver() {
+        // Dibuja el estado de Game Over en la ventana
+    }
+};
+
+int main() {
+    Game game;
+    game.run();
+
+    return EXIT_SUCCESS;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+jugador: 
+
+#include <SFML/Audio.hpp>
+#include <SFML/Graphics.hpp>
+#include <iostream>
+#include <ctime>
+
+enum class Estado {
+    MENU,
+    JUGANDO,
+    GAME_OVER
+};
+
+class Jugador {
+private:
+    sf::RenderWindow window;
+    Estado estado;
+
+    // Declaración de texturas y sprites
+    sf::Texture enemy1Texture, enemy2Texture, civilTexture, miraTexture;
+    sf::Sprite enemy1, enemy2, civil, mira;
+
+    // Declaración de variables del jugador
+    int playerLives;
+    int playerScore;
+    bool enemy1Visible, enemy2Visible, civilVisible;
+
+    // Declaración de relojes y tiempos
+    sf::Clock enemyAttackClock, civilClock, gameOverClock;
+    float enemyAttackTime, civilDisappearTime;
+
+    // Declaración de elementos de texto y música
+    sf::Font font;
+    sf::Text menuJugar, menuAbandonar, ultimaPuntuacion, livesText, scoreText, gameOverText;
+    sf::Music fondo;
+
+    bool gameOver;
+
+public:
+    Jugador() : window(sf::VideoMode(800, 600), "Shooter Game"), estado(Estado::MENU) {
+        // Inicialización de las texturas
+        if (!enemy1Texture.loadFromFile("C:/Users/santino/Desktop/Nueva carpeta (9)/Textura/enemy1.jpg") ||
+            !enemy2Texture.loadFromFile("C:/Users/santino/Desktop/Nueva carpeta (9)/Textura/enemy2.jpg") ||
+            !civilTexture.loadFromFile("C:/Users/santino/Desktop/Nueva carpeta (9)/Textura/civil.jpg") ||
+            !miraTexture.loadFromFile("C:/Users/santino/Desktop/Nueva carpeta (9)/Textura/mira.jpg")) {
+            exit(EXIT_FAILURE);
+        }
+
+        // Inicialización de los sprites
+        enemy1.setTexture(enemy1Texture);
+        enemy2.setTexture(enemy2Texture);
+        civil.setTexture(civilTexture);
+        mira.setTexture(miraTexture);
+
+        // Inicialización de las variables del jugador
+        playerLives = 9;
+        playerScore = 0;
+        enemy1Visible = true;
+        enemy2Visible = true;
+        civilVisible = true;
+
+        // Inicialización de tiempos
+        enemyAttackTime = 15.0f;
+        civilDisappearTime = 15.0f;
+
+        // Inicialización del texto y la música
+        if (!font.loadFromFile("C:/Users/santino/Desktop/Nueva carpeta (9)/Textura/Payday.ttf") ||
+            !fondo.openFromFile("C:/Users/santino/Desktop/Nueva carpeta (9)/Sonido/fondo.ogg")) {
+            exit(EXIT_FAILURE);
+        }
+
+        menuJugar.setFont(font);
+        menuJugar.setString("Jugar");
+        menuJugar.setCharacterSize(30);
+        menuJugar.setPosition(300, 300);
+
+        menuAbandonar.setFont(font);
+        menuAbandonar.setString("Abandonar");
+        menuAbandonar.setCharacterSize(30);
+        menuAbandonar.setPosition(300, 350);
+
+        ultimaPuntuacion.setFont(font);
+        ultimaPuntuacion.setCharacterSize(20);
+        ultimaPuntuacion.setPosition(300, 400);
+
+        livesText.setFont(font);
+        livesText.setCharacterSize(20);
+        livesText.setPosition(10, 10);
+
+        scoreText.setFont(font);
+        scoreText.setCharacterSize(20);
+        scoreText.setPosition(600, 10);
+
+        gameOverText.setFont(font);
+        gameOverText.setString("GAME OVER");
+        gameOverText.setCharacterSize(50);
+        gameOverText.setPosition(250, 250);
+
+        gameOver = false;
+    }
+
+    void ejecutarJuego() {
+        while (window.isOpen()) {
+            sf::Event event;
+            while (window.pollEvent(event)) {
+                if (event.type == sf::Event::Closed) {
+                    window.close();
+                }
+
+                if (estado == Estado::MENU && event.type == sf::Event::MouseButtonPressed) {
+                    sf::Vector2i mousePosition = sf::Mouse::getPosition(window);
+                    if (menuJugar.getGlobalBounds().contains(static_cast<float>(mousePosition.x), static_cast<float>(mousePosition.y))) {
+                        estado = Estado::JUGANDO;
+                    } else if (menuAbandonar.getGlobalBounds().contains(static_cast<float>(mousePosition.x), static_cast<float>(mousePosition.y))) {
+                        std::cout << "Has abandonado el juego." << std::endl;
+                        window.close();
+                        exit(EXIT_SUCCESS);
+                    }
+                }
+            }
+
+            window.clear();
+
+            if (estado == Estado::MENU) {
+                window.draw(menuJugar);
+                window.draw(menuAbandonar);
+                ultimaPuntuacion.setString("Última puntuación: " + std::to_string(playerScore));
+                window.draw(ultimaPuntuacion);
+            } else if (estado == Estado::JUGANDO) {
+                // Lógica del juego
+                estado = Estado::GAME_OVER; // Propósito de demostración: terminar el juego después de un ciclo
+            } else if (estado == Estado::GAME_OVER) {
+                // Mostrar el estado de Game Over si es necesario
+                std::cout << "Juego terminado. Puntuación final: " << playerScore << std::endl;
+                resetJuego();
+                estado = Estado::MENU;
+            }
+
+            window.display();
+        }
+    }
+
+    void resetJuego() {
+        playerLives = 9;
+        playerScore = 0;
+        enemy1Visible = true;
+        enemy2Visible = true;
+        civilVisible = true;
+        enemyAttackClock.restart();
+        civilClock.restart();
+        gameOverClock.restart();
+        gameOver = false;
+    }
+};
+
+int main() {
+    Jugador jugador;
+    jugador.ejecutarJuego();
+
+    return EXIT_SUCCESS;
+}
+
+
+
+Clase principal: cargar sprite, posicion o conjunto de pocisiones de los sprites, desplasamiento
+
+derivado de Clase principal (enemigo): sprite del enemigo, posicion o conjunto de pocisiones de los enemigos, desplasamiento, ataque, tiempo en pantalla
+
+derivado de Clase principal (inocentes): sprite del inocente, posicion o conjunto de pocisiones de los imocemtes, desplazamiento 
+
+
+
+sf::FloatRect otherBounds = other.getGlobalBounds();
+sf::FloatRect enemy1Bounds = enemy1.getGlobalBounds();
+sf::FloatRect enemy2Bounds = enemy2.getGlobalBounds();
+sf::FloatRect civilBounds = civil.getGlobalBounds();
+
+if (otherBounds.intersects(enemy1Bounds) && enemy1Visible) {
+    enemy1Visible = false;
+    playerScore += 10;
+}
+
+if (otherBounds.intersects(enemy2Bounds) && enemy2Visible) {
+    enemy2Visible = false;
+    playerScore += 10;
+}
+
+if (otherBounds.intersects(civilBounds) && civilVisible) {
+    civilVisible = false;
+    playerScore -= 5;
+}
