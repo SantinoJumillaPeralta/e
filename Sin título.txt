@@ -1,0 +1,47 @@
+
+variante civil y enemigo 
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+sf::Texture enemy1Texture;
+if (!enemy1Texture.loadFromFile("C:/Users/santino/Desktop/Nueva carpeta (9)/Textura/enemy1.jpg")) {
+    return EXIT_FAILURE;
+}
+
+sf::Texture civilTexture;
+if (!civilTexture.loadFromFile("C:/Users/santino/Desktop/Nueva carpeta (9)/Textura/civil.jpg")) {
+    return EXIT_FAILURE;
+}
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+sf::Sprite enemy1(enemy1Texture);
+sf::Sprite civil(civilTexture);
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+while (window.pollEvent(event)) {
+    // ...
+    if (event.type == sf::Event::MouseButtonPressed) {
+        sf::Vector2i mousePosition = sf::Mouse::getPosition(window);
+
+        if (enemy1.getGlobalBounds().contains(static_cast<float>(mousePosition.x), static_cast<float>(mousePosition.y)) && enemy1Visible) {
+            enemy1Visible = false;
+            playerScore += 10;
+        }
+
+        // ...
+
+        if (civil.getGlobalBounds().contains(static_cast<float>(mousePosition.x), static_cast<float>(mousePosition.y)) && civilVisible) {
+            civilVisible = false;
+            playerScore -= 5;
+        }
+    }
+}
+
+if (enemy1Visible) {
+    window.draw(enemy1);
+}
+
+if (civilVisible) {
+    window.draw(civil);
+}
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
